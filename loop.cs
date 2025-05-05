@@ -17,7 +17,7 @@ namespace SimplePasswordManager
         {
             ConsoleKeyInfo key = Globals.MenuBuilder(
                 "[C]reate a new login",
-                "[O]pen a login,"
+                "[O]pen a login,",
                 "[D]elete a login",
                 "[V]iew all logins",
                 "[L]ock the app",

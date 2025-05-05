@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Metadata;
 
 namespace SimplePasswordManager
 {
@@ -17,9 +18,10 @@ namespace SimplePasswordManager
         {
             ConsoleKeyInfo key = Globals.MenuBuilder(
                 "[C]reate a new login",
-                "[O]pen a login,",
+                "[O]pen a login",
                 "[D]elete a login",
                 "[V]iew all logins",
+                "[S]ettings",
                 "[L]ock the app",
                 "[Q]uit the app"
                 );
@@ -28,6 +30,7 @@ namespace SimplePasswordManager
             else if (key.Key == ConsoleKey.O) { /* open a login */}
             else if (key.Key == ConsoleKey.D) { /* delete a login */ }
             else if (key.Key == ConsoleKey.V) { ViewLogins(); }
+            else if (key.Key == ConsoleKey.S) { /* open settings */ }
             else if (key.Key == ConsoleKey.L) { Init.Lock(); }
             else if (key.Key == ConsoleKey.Q) { Environment.Exit(0); }
             else { MainMenu(); }
@@ -37,67 +40,37 @@ namespace SimplePasswordManager
         {
             Globals.ClearConsole();
             Console.WriteLine("You are creating a new login.");
-            Console.Write("Enter username/email: ");
 
-            // check for escape key before reading username
-            ConsoleKeyInfo key;
-            string username = "";
-            while (true)
+            // Username input
+            Console.Write("Enter username/email (Esc to cancel): ");
+            string username = Globals.ReadInput();
+            if (username == null)
             {
-                key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Escape)
-                {
-                    MainMenu();
-                    return;
-                }
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    username = Console.ReadLine();
-                    break;
-                }
-                username += key.KeyChar;
-                Console.Write(key.KeyChar);
+                Globals.ClearConsole();
+                MainMenu();
+                return;
             }
 
-            Console.Write("Enter password: ");
-            string password = "";
-            while (true)
+            // Password input
+            Console.Write("Enter password (Esc to cancel): ");
+            string password = Globals.ReadInput();
+            if (password == null)
             {
-                key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Escape)
-                {
-                    MainMenu();
-                    return;
-                }
-                if (key.Key == ConsoleKey.Enter)
-                {
-                    password = Console.ReadLine();
-                    break;
-                }
-                password += key.KeyChar;
-                Console.Write(key.KeyChar);
+                Globals.ClearConsole();
+                MainMenu();
+                return;
             }
 
+            // Extra messages
             List<string> extraMessages = new List<string>();
             while (true)
             {
-                Console.Write("Add extra message (press Enter to skip, Escape to finish): ");
-                string message = "";
-                while (true)
+                Console.Write("Add extra message (Enter to skip, Esc to finish): ");
+                string message = Globals.ReadInput();
+                if (message == null)
                 {
-                    key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Escape)
-                    {
-                        CreateLoginJSON(username, password, extraMessages.ToArray());
-                        return;
-                    }
-                    if (key.Key == ConsoleKey.Enter)
-                    {
-                        message = Console.ReadLine();
-                        break;
-                    }
-                    message += key.KeyChar;
-                    Console.Write(key.KeyChar);
+                    CreateLoginJSON(username, password, extraMessages.ToArray());
+                    return;
                 }
 
                 if (!string.IsNullOrEmpty(message))
@@ -106,7 +79,7 @@ namespace SimplePasswordManager
                 }
                 else
                 {
-                    break; // empty input skips to finish
+                    break; // Empty input skips to finish
                 }
             }
 
@@ -137,20 +110,27 @@ namespace SimplePasswordManager
             }
 
             // serialize it
-            string jsonContent = j.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver() // Add TypeInfoResolver
+            };
+            string jsonContent = j.ToJsonString(options);
 
+            Console.WriteLine();
             Console.WriteLine("Login item created: ");
             Console.WriteLine(jsonContent);
+            Console.WriteLine();
             Console.WriteLine("Is this OK?");
             
             while (true) 
             {
                 ConsoleKeyInfo key = Globals.MenuBuilder("[Y]es", "[N]o");
+                Console.WriteLine();
 
                 if (key.Key == ConsoleKey.Y)
                 {
-                    Console.Write("Please provide a name for the login");
-                    Console.Write(": ");
+                    Console.Write("Please provide a name for the login: ");
                     string fileName = Console.ReadLine();
                     string path = Path.Combine(Globals.loginsFolder, fileName);
                     Globals.loginFiles.Add(fileName);
@@ -173,7 +153,7 @@ namespace SimplePasswordManager
             string[] files = Globals.loginFiles.ToArray();
             foreach (string i in files) { Console.WriteLine(i); }
             Console.WriteLine("Press any key to go back");
-            Console.ReadKey();
+            Console.ReadKey(true);
             Globals.ClearConsole();
             MainMenu();
         }

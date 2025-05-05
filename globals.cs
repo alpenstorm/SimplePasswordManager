@@ -81,13 +81,54 @@ namespace SimplePasswordManager
             return password.ToString();
         }
 
+        /// <summary>
+        /// Reads user input from the console, displaying each character as typed for verification.
+        /// Returns the input string or null if the user presses Escape to cancel.
+        /// Supports backspace for editing.
+        /// </summary>
+        /// <returns>The input string, or null if Escape is pressed.</returns>
+        public static string ReadInput()
+        {
+            StringBuilder input = new StringBuilder();
+            while (true)
+            {
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine(); // Move to next line
+                    return input.ToString();
+                }
+                else if (key.Key == ConsoleKey.Escape)
+                {
+                    return null; // Indicate cancellation
+                }
+                else if (key.Key == ConsoleKey.Backspace)
+                {
+                    if (input.Length > 0)
+                    {
+                        input.Length--;
+                        Console.Write("\b \b"); // Remove last character from display
+                    }
+                }
+                else
+                {
+                    input.Append(key.KeyChar);
+                    Console.Write(key.KeyChar); // Display the typed character
+                    if (debugMode)
+                    {
+                        Console.WriteLine($"[DEBUG] Added char: {key.KeyChar}");
+                    }
+                }
+            }
+        }
+
         public static ConsoleKeyInfo MenuBuilder(params string[] messages)
         {
             foreach (string i in messages)
             {
                 Console.WriteLine(i);
             }
-            Console.WriteLine(": ");
+            Console.Write(": ");
             return Console.ReadKey();
         }
     }

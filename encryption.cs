@@ -63,32 +63,23 @@ namespace SimplePasswordManager
                 }
             }
         }
-        
-        public static string Decrypt(
-            string inputFilePath, 
-            string outputFilePath, 
-            string password)
+
+        public static void Decrypt(string inputFilePath, string outputFilePath, string password)
         {
             if (!File.Exists(inputFilePath))
             {
                 throw new FileNotFoundException("Input file not found.", inputFilePath);
             }
 
-            // open encrypted file
-            using (var inputStream = new FileStream(
-                inputFilePath,
-                FileMode.Open,
-                FileAccess.Read))
+            using (var inputStream = new FileStream(inputFilePath, FileMode.Open, FileAccess.Read))
             {
                 byte[] salt = new byte[16];
                 byte[] iv = new byte[16];
                 inputStream.Read(salt, 0, salt.Length);
                 inputStream.Read(iv, 0, iv.Length);
 
-                // derive key
                 byte[] key = DeriveKey(password, salt);
 
-                // create AES encryptor
                 using (Aes aes = Aes.Create())
                 {
                     aes.KeySize = keySize;
@@ -98,24 +89,20 @@ namespace SimplePasswordManager
                     aes.Key = key;
                     aes.IV = iv;
 
-                    using (var memoryStream = new MemoryStream())
+                    using (var outputStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write))
                     {
-                        using (var cryptoStream = new CryptoStream(
-                            inputStream,
-                            aes.CreateDecryptor(),
-                            CryptoStreamMode.Read))
+                        using (var cryptoStream = new CryptoStream(outputStream, aes.CreateDecryptor(), CryptoStreamMode.Write))
                         {
                             try
                             {
-                                cryptoStream.CopyTo(memoryStream);
+                                inputStream.CopyTo(cryptoStream);
+                                cryptoStream.FlushFinalBlock();
                             }
                             catch (CryptographicException ex)
                             {
-                                throw new CryptographicException(
-                                    "AES decryption failed; incorrect password or corrupted data.", ex);
+                                throw new CryptographicException("AES decryption failed; incorrect password or corrupted data.", ex);
                             }
                         }
-                        return Encoding.UTF8.GetString(memoryStream.ToArray());
                     }
                 }
             }
@@ -146,24 +133,52 @@ namespace SimplePasswordManager
         public static string DecryptString(string encryptionPassword, string fileToDecrypt)
         {
             string tempFolder = Path.Combine(Globals.rootFolder, "temp");
-            string tempFile = Path.Combine(tempFolder, "temp_file");
+            string tempFile = Path.Combine(tempFolder, $"temp_file_{Guid.NewGuid().ToString()}.tmp"); // Unique file name
 
-            Directory.CreateDirectory(tempFolder);
-            File.Create(tempFile);
+            try
+            {
+                // Ensure the temp folder exists
+                Directory.CreateDirectory(tempFolder);
 
-            // but what if we want to decrypt the password file?
-            // then, we ask the user for the password
-            // we try to open the password file using the user-provided password
-            // and then compare the password that the user gave to the one in the file
-            // and if they match, then we unlock the app
-            Decrypt(fileToDecrypt, tempFile, encryptionPassword);
-            
-            string decryptedString = File.ReadAllText(tempFile);
+                if (Globals.debugMode)
+                {
+                    Console.WriteLine($"Decrypting {fileToDecrypt} to {tempFile}");
+                }
 
-            File.Delete(tempFile);
-            Directory.Delete(tempFolder);
+                // Decrypt the file to the temporary location
+                Decrypt(fileToDecrypt, tempFile, encryptionPassword);
 
-            return decryptedString;
+                // Read the decrypted content
+                if (!File.Exists(tempFile))
+                {
+                    throw new FileNotFoundException($"Temporary file was not created: {tempFile}");
+                }
+
+                string decryptedString = File.ReadAllText(tempFile);
+                return decryptedString;
+            }
+            finally
+            {
+                // Clean up
+                try
+                {
+                    if (File.Exists(tempFile))
+                    {
+                        File.Delete(tempFile);
+                    }
+                    if (Directory.Exists(tempFolder) && !Directory.EnumerateFileSystemEntries(tempFolder).Any())
+                    {
+                        Directory.Delete(tempFolder);
+                    }
+                }
+                catch (IOException ex)
+                {
+                    if (Globals.debugMode)
+                    {
+                        Console.WriteLine($"Warning: Could not delete temp files: {ex.Message}");
+                    }
+                }
+            }
         }
 
         public static string GenerateRandomString(int length)

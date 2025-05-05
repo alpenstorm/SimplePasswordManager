@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Security.Cryptography;
 using System.Data;
+using System.Text.Json.Serialization.Metadata;
 
 namespace SimplePasswordManager
 {
@@ -29,7 +30,12 @@ namespace SimplePasswordManager
             };
 
             // serialize it
-            string jsonContent = j.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+            };
+            string jsonContent = j.ToJsonString(options);
 
             Console.WriteLine("Detected first load, creating initial config...");
             Console.WriteLine("Config created: ");
@@ -38,7 +44,7 @@ namespace SimplePasswordManager
             // save it
             File.WriteAllText(Globals.configFile, jsonContent);
             Console.Write("Press any key to continue: ");
-            Console.ReadKey();
+            Console.ReadKey(true);
             Globals.ClearConsole();
             
             // start the create password dialog
@@ -56,6 +62,8 @@ namespace SimplePasswordManager
             Console.WriteLine("Your recovery code is: ");
             Console.WriteLine(Globals.recoveryCode);
             Console.WriteLine("Please save it somewhere you will remember to use in case you forget your password");
+            Console.WriteLine("Press any key to continue... ");
+            Console.ReadKey(true);
 
             // save it
             Encryption.EncryptString(
@@ -140,17 +148,35 @@ namespace SimplePasswordManager
 
                 if (key.Key == ConsoleKey.P)
                 {
+                    Console.WriteLine();
                     Console.Write("Enter Password: ");
-                    if (VerifyPassword(Globals.ReadPassword(), Globals.passwordFile)) { return; }
+                    string passwordInput = Globals.ReadPassword();
+                    if (VerifyPassword(passwordInput, Globals.passwordFile)) 
+                    {
+                        Globals.password = passwordInput;
+                        Globals.ClearConsole();
+                        return; 
+                    }
+
+                    else
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Wrong password! Please try again!");
+                        Console.ReadKey(true);
+                        Globals.ClearConsole();
+                        continue;
+                    }
                 }
 
                 else if (key.Key == ConsoleKey.R)
                 {
+                    Console.WriteLine();
                     Console.Write("Enter recovery code: ");
                     
                     if (VerifyPassword(Globals.ReadPassword(), Globals.recoveryCodeFile))
                     {
-                        Console.WriteLine("You've entered a recovery code, \nplease reset your password before continuing!");
+                        Console.WriteLine();
+                        Console.WriteLine("You've entered a recovery code, please reset your password before continuing!");
                         Globals.password = CreatePasswordDialog();
                         Globals.recoveryCode = Encryption.GenerateRandomString(24);
 
@@ -172,6 +198,8 @@ namespace SimplePasswordManager
                         Console.WriteLine("Your new recovery code is: ");
                         Console.WriteLine(Globals.recoveryCode);
                         Console.WriteLine("Please save it somewhere you will remember to use in case you forget your password");
+                        Console.WriteLine("Press any key to continue... ");
+                        Console.ReadKey(true);
                         Globals.ClearConsole();
                         
                         return;
@@ -188,9 +216,19 @@ namespace SimplePasswordManager
 
         private static bool VerifyPassword(string passwordToCheck, string fileToCheck)
         {
-            string c = Encryption.DecryptString(passwordToCheck, fileToCheck);
-            if (c == passwordToCheck) { return true; }
-            else { return false; }
+            try
+            {
+                string decrypted = Encryption.DecryptString(passwordToCheck, fileToCheck);
+                return decrypted == passwordToCheck;
+            }
+            catch (CryptographicException)
+            {
+                return false; // Incorrect password
+            }
+            catch (FileNotFoundException)
+            {
+                return false; // File missing
+            }
         }
 
         private static void AssignFolderLocations()

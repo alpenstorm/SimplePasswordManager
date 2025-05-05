@@ -16,10 +16,12 @@ namespace SimplePasswordManager
             Console.WriteLine("          by alpenstorm          ");
             Console.WriteLine("*********************************");
             Console.Write("Press any key to start: ");
-            Console.ReadKey();
+            Console.ReadKey(true);
             Globals.ClearConsole();
             
             if (Globals.isFirstLoad) { Init.FirstLoad(); }
+
+            Init.Unlock();
             Loop.MainLoop();
         }
     }

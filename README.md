@@ -98,7 +98,7 @@ Contributions are welcome! Please follow these steps:
 This project is licensed under the GNU License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
-For questions or feedback, please contact [my email](alpenstorm.sh1ry0n@gmail.com) or open an issue on the GitHub repository.
+For questions or feedback, please contact alpenstorm.sh1ry0n@gmail.com or open an issue on the GitHub repository.
 
 ---
 *Built with security and simplicity in mind by alpenstorm (and Grok AI).*

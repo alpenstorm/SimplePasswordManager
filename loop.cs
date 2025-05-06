@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Nodes;
 using System.Text.Json;
-using System.Diagnostics;
 using System.Text.Json.Serialization.Metadata;
+using System.Diagnostics;
 
 namespace SimplePasswordManager
 {
@@ -26,8 +21,8 @@ namespace SimplePasswordManager
                 "[Q]uit the app"
                 );
             
-            if (key.Key == ConsoleKey.C) { CreateLogin(); }
-            else if (key.Key == ConsoleKey.O) { /* open a login */}
+            if (key.Key == ConsoleKey.C)      { CreateLogin(); }
+            else if (key.Key == ConsoleKey.O) { OpenLogin(); }
             else if (key.Key == ConsoleKey.D) { /* delete a login */ }
             else if (key.Key == ConsoleKey.V) { ViewLogins(); }
             else if (key.Key == ConsoleKey.S) { /* open settings */ }
@@ -102,10 +97,7 @@ namespace SimplePasswordManager
             if (extraMessages != null && extraMessages.Length > 0)
             {
                 JsonArray messagesArray = new JsonArray();
-                foreach (string i in extraMessages)
-                {
-                    messagesArray.Add(i);
-                }
+                foreach (string i in extraMessages) { messagesArray.Add(i); }
                 j["extraMessages"] = messagesArray;
             }
 
@@ -135,6 +127,11 @@ namespace SimplePasswordManager
                     string path = Path.Combine(Globals.loginsFolder, fileName);
                     Globals.loginFiles.Add(fileName);
                     Encryption.EncryptString(Globals.password, jsonContent, path, fileName);
+                    Console.WriteLine($"Successfully created {fileName}, press any key to continue.");
+                    Console.ReadKey(true);
+                    Globals.ClearConsole();
+                    MainMenu();
+                    break;
                 }
 
                 else if (key.Key == ConsoleKey.N) 
@@ -148,14 +145,50 @@ namespace SimplePasswordManager
             }
         }
 
+        private static void OpenLogin()
+        {
+            Globals.ClearConsole();
+            Console.WriteLine("Enter the name of the login you want to open: ");
+            string loginToOpen = Console.ReadLine();
+            if (FindLogin(loginToOpen))
+            {
+                string decryptedString = Encryption.DecryptString(Globals.password, loginToOpen);
+                Console.WriteLine(decryptedString);
+                ConsoleKeyInfo key = Globals.MenuBuilder("[E]dit", "[D]elete", "[C]opy", "[B]ack");
+                
+                if (key.Key == ConsoleKey.E)
+                {
+                    Console.WriteLine("Opening config file in default editor...");
+                    Process.Start(decryptedString);
+                }
+            }
+            else
+            {
+                Console.WriteLine("Login not found, press any key to go back.");
+                Console.ReadKey(true);
+                Globals.ClearConsole();
+                MainMenu();
+            }
+        }
+
         private static void ViewLogins()
         {
+            Globals.ClearConsole();
             string[] files = Globals.loginFiles.ToArray();
-            foreach (string i in files) { Console.WriteLine(i); }
-            Console.WriteLine("Press any key to go back");
+            foreach (string i in files) { Console.WriteLine(Path.GetFileName(i)); }
+            Console.WriteLine("Press any key to go back.");
             Console.ReadKey(true);
             Globals.ClearConsole();
             MainMenu();
+        }
+
+        private static bool FindLogin(string searchTerm)
+        {
+            foreach (string i in Globals.loginFiles)
+            {
+                if (searchTerm.Equals(Path.GetFileName(i), StringComparison.OrdinalIgnoreCase)) { return true; }
+            }
+            return false;
         }
     }
 }

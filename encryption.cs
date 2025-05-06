@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
 
 namespace SimplePasswordManager
 {
@@ -109,73 +104,100 @@ namespace SimplePasswordManager
         }
 
         public static void EncryptString(
-            string encryptionPassword, 
-            string encryptableString, 
+            string encryptionPassword,
+            string encryptableString,
             string locationToSave,
-            string fileName
-            )
+            string fileName)
         {
-            // creating the temporary password file and removing it after encrypting
-            string tempFolder = Path.Combine(Globals.rootFolder, "temp");
-            string tempFile = Path.Combine(tempFolder, $"{fileName}");
-
-            Directory.CreateDirectory(tempFolder);
-            File.WriteAllText(tempFile, encryptableString);
-
-            Encrypt(tempFile, locationToSave, encryptionPassword);
-
-            if (Globals.debugMode) { Console.WriteLine($"String saved to {locationToSave}"); }
-
-            File.Delete(tempFile);
-            Directory.Delete(tempFolder);
-        }
-
-        public static string DecryptString(string encryptionPassword, string fileToDecrypt)
-        {
-            string tempFolder = Path.Combine(Globals.rootFolder, "temp");
-            string tempFile = Path.Combine(tempFolder, $"temp_file_{Guid.NewGuid().ToString()}.tmp"); // Unique file name
+            // Use a unique temporary directory to avoid conflicts
+            string tempFolder = Path.Combine(Globals.rootFolder, $"temp_{Guid.NewGuid().ToString()}");
+            string tempFile = Path.Combine(tempFolder, fileName);
 
             try
             {
-                // Ensure the temp folder exists
+                // Create temporary directory
                 Directory.CreateDirectory(tempFolder);
+
+                // Write the string to a temporary file
+                File.WriteAllText(tempFile, encryptableString);
+
+                // Encrypt the temporary file
+                Encrypt(tempFile, locationToSave, encryptionPassword);
 
                 if (Globals.debugMode)
                 {
-                    Console.WriteLine($"Decrypting {fileToDecrypt} to {tempFile}");
+                    Console.WriteLine($"String saved to {locationToSave}");
                 }
-
-                // Decrypt the file to the temporary location
-                Decrypt(fileToDecrypt, tempFile, encryptionPassword);
-
-                // Read the decrypted content
-                if (!File.Exists(tempFile))
-                {
-                    throw new FileNotFoundException($"Temporary file was not created: {tempFile}");
-                }
-
-                string decryptedString = File.ReadAllText(tempFile);
-                return decryptedString;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"Error: Access denied to {tempFolder}. Please ensure the application has permission to write to this directory.");
+                throw;
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Error: Failed to create or write to temporary file at {tempFolder}. {ex.Message}");
+                throw;
             }
             finally
             {
-                // Clean up
+                // Clean up temporary files and directory
                 try
                 {
                     if (File.Exists(tempFile))
                     {
                         File.Delete(tempFile);
                     }
-                    if (Directory.Exists(tempFolder) && !Directory.EnumerateFileSystemEntries(tempFolder).Any())
+                    if (Directory.Exists(tempFolder))
                     {
                         Directory.Delete(tempFolder);
                     }
                 }
-                catch (IOException ex)
+                catch (Exception ex)
                 {
                     if (Globals.debugMode)
                     {
-                        Console.WriteLine($"Warning: Could not delete temp files: {ex.Message}");
+                        Console.WriteLine($"Warning: Failed to clean up temporary directory {tempFolder}. {ex.Message}");
+                    }
+                }
+            }
+        }
+
+        public static string DecryptString(string encryptionPassword, string fileToDecrypt)
+        {
+            string tempFolder = Path.Combine(Globals.rootFolder, $"temp_{Guid.NewGuid().ToString()}");
+            string tempFile = Path.Combine(tempFolder, "temp_file");
+
+            try
+            {
+                Directory.CreateDirectory(tempFolder);
+                Decrypt(fileToDecrypt, tempFile, encryptionPassword);
+                string decryptedString = File.ReadAllText(tempFile);
+                return decryptedString;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"Error: Access denied to {tempFolder}. Please ensure the application has permission to write to this directory.");
+                throw;
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempFile))
+                    {
+                        File.Delete(tempFile);
+                    }
+                    if (Directory.Exists(tempFolder))
+                    {
+                        Directory.Delete(tempFolder);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (Globals.debugMode)
+                    {
+                        Console.WriteLine($"Warning: Failed to clean up temporary directory {tempFolder}. {ex.Message}");
                     }
                 }
             }

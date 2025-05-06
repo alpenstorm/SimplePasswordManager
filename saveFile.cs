@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SimplePasswordManager
+﻿namespace SimplePasswordManager
 {
     internal class SaveFile
     {
@@ -15,7 +9,7 @@ namespace SimplePasswordManager
     internal class Config
     {
         // these are loaded into memory in
-        // init.cs, starting from line 94
+        // LoadConfig, in init.cs
 
         public bool isFirstLoad { get; set; }
         public bool debugMode { get; set; }

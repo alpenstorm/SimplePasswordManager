@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
-
-namespace SimplePasswordManager
+﻿namespace SimplePasswordManager
 {
     internal class Program
     {

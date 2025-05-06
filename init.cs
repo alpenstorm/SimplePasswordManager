@@ -1,11 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Security.Cryptography;
-using System.Data;
 using System.Text.Json.Serialization.Metadata;
 
 namespace SimplePasswordManager
@@ -161,7 +156,7 @@ namespace SimplePasswordManager
                     else
                     {
                         Console.WriteLine();
-                        Console.WriteLine("Wrong password! Please try again!");
+                        Console.WriteLine("Wrong password! Press any key to try again.");
                         Console.ReadKey(true);
                         Globals.ClearConsole();
                         continue;

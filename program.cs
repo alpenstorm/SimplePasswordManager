@@ -21,6 +21,7 @@
 
                 if (Globals.isFirstLoad) { Init.FirstLoad(); }
 
+                Init.Unlock();
                 Loop.MainLoop();
 
                 if (Globals.debugMode)

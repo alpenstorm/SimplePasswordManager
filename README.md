@@ -1,7 +1,8 @@
 # SimplePasswordManager
 
 ## Overview
-SimplePasswordManager is a lightweight, console-based password manager written in C#. It provides a secure way to store and manage login credentials using AES-256 encryption. The application is designed to be simple, user-friendly, and secure, with features like password encryption, recovery codes, and a minimalistic interface.
+SimplePasswordManager is a lightweight, console-based password manager written in C#. It provides a secure way to store and manage login credentials using AES-256 encryption. The application is designed to be simple, user-friendly, and secure, with features like password encryption, recovery codes, and a minimalistic, terminal-based interface. 
+I've used Grok AI to write boilerplate code and look things up in documentation, as this is my first C# project (if you don't count Unity stuff). In fact, Grok AI wrote most of this README.
 
 ## Features
 - **Secure Storage**: Encrypts all sensitive data (passwords, recovery codes, and login details) using AES-256 encryption with CBC mode and PKCS7 padding.
@@ -35,6 +36,7 @@ SimplePasswordManager/
 3. **Build and Run**:
    - Build the solution in Visual Studio.
    - Run the application to start the console interface.
+Or you can download a pre-built binary for (Windows)[] and OSX (soon).
 
 ## Usage
 1. **Initial Setup**:
@@ -43,10 +45,10 @@ SimplePasswordManager/
    - A recovery code will be generated and displayed; save it securely.
 2. **Main Menu**:
    - `[C]reate a new login`: Add a new login with a username, password, and optional extra messages.
-   - `[O]pen a login`: (Not yet implemented) View a specific login's details.
-   - `[D]elete a login`: (Not yet implemented) Remove a login.
+   - `[O]pen a login`: View a specific login's details.
+   - `[D]elete a login`: Remove a login.
    - `[V]iew all logins`: List all saved login file names.
-   - `[S]ettings`: (Not yet implemented) Modify application settings.
+   - `[S]ettings`: Modify application settings.
    - `[L]ock the app`: Lock the application, requiring the master password or recovery code to unlock.
    - `[Q]uit the app`: Exit the application.
 3. **Unlocking**:
@@ -64,15 +66,13 @@ The `config.json` file in the `config/` directory stores application settings:
 {
   "config": {
     "first_load": false,
-    "debug_mode": false,
-    "timeout": 300
+    "debug_mode": false
   },
   "version": "0.0.1a"
 }
 ```
 - `first_load`: Indicates if the application is running for the first time.
 - `debug_mode`: Enables debug output for troubleshooting.
-- `timeout`: (Not yet implemented) Timeout duration in seconds.
 - `version`: Application version.
 
 ## Development
@@ -85,6 +85,7 @@ The `config.json` file in the `config/` directory stores application settings:
   - `init.cs`: Initialization and configuration loading.
   - `loop.cs`: Main application loop and menu logic.
   - `saveFile.cs`: Data models for configuration deserialization.
+All functions have been documented.
 
 ## Contributing
 Contributions are welcome! Please follow these steps:

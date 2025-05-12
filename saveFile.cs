@@ -1,18 +1,34 @@
 ﻿namespace SimplePasswordManager
 {
+    /// <summary>
+    /// Represents the structure of the configuration save file.
+    /// </summary>
     internal class SaveFile
     {
-        public Config config {  get; set; }
+        /// <summary>
+        /// Gets or sets the configuration settings.
+        /// </summary>
+        public Config config { get; set; }
+
+        /// <summary>
+        /// Gets or sets the version of the application.
+        /// </summary>
         public string version { get; set; }
     }
 
+    /// <summary>
+    /// Represents the configuration settings stored in the save file.
+    /// </summary>
     internal class Config
     {
-        // these are loaded into memory in
-        // LoadConfig, in init.cs
-
+        /// <summary>
+        /// Gets or sets whether this is the first load of the application.
+        /// </summary>
         public bool isFirstLoad { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether debug mode is enabled.
+        /// </summary>
         public bool debugMode { get; set; }
-        public int timeout { get; set; }
     }
 }

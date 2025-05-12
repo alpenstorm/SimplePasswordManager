@@ -96,7 +96,7 @@ Contributions are welcome! Please follow these steps:
 5. Submit a pull request with a clear description of your changes.
 
 ## License
-This project is licensed under the GNU License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL 3.0 License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 For questions or feedback, please contact alpenstorm.sh1ry0n@gmail.com or open an issue on the GitHub repository.

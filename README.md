@@ -36,7 +36,7 @@ SimplePasswordManager/
 3. **Build and Run**:
    - Build the solution in Visual Studio.
    - Run the application to start the console interface.
-Or you can download a pre-built binary for (Windows)[] and OSX (soon).
+Or you can download a pre-built binary for (Windows)[https://github.com/alpenstorm/SimplePasswordManager/releases/download/v1.0.0/install.exe] and OSX (soon).
 
 ## Usage
 1. **Initial Setup**:

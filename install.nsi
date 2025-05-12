@@ -1,6 +1,6 @@
 !include "MUI.nsh"
 
-!define MUI_ICON "icon.ico"
+!define MUI_ICON "spm.ico"
 
 name "SimplePasswordManager"
 InstallDir "$PROGRAMFILES\SimplePasswordManager"
@@ -28,8 +28,9 @@ Section "Install"
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SPM" "NoModify" 1
     WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SPM" "NoRepair" 1
     
-    File "bin/debug/net8.0/SimplePasswordManager.exe"
-    File "bin/debug/net8.0/SimplePasswordManager.dll"
+    File "bin\debug\net8.0\spm.exe"
+    File "bin\debug\net8.0\spm.dll"
+    File "bin\debug\net8.0\spm.runtimeconfig.json"
     File "spm.ico"
 
     # Add to system PATH

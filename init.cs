@@ -65,7 +65,6 @@ namespace SimplePasswordManager
                 }
 
                 Globals.ClearConsole();
-                Unlock();
             }
             catch (IOException ex)
             {

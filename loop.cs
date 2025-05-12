@@ -94,7 +94,7 @@ namespace SimplePasswordManager
                 }
 
                 Console.Write("Enter password (Esc to cancel): ");
-                string password = Globals.ReadInput();
+                string password = Globals.ReadPassword();
                 if (password == null)
                 {
                     Back(false);

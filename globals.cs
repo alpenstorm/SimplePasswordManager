@@ -13,7 +13,7 @@ namespace SimplePasswordManager
         // Save file variables
         public static bool isFirstLoad = true;
         public static bool debugMode = false;
-        public static string version = "0.0.1a";
+        public static string version = "1.0.0";
 
         // Filesystem structure
         public static string rootFolder;

@@ -196,7 +196,6 @@ namespace SimplePasswordManager
                         Console.WriteLine("Press any key to continue... ");
                         Console.ReadKey(true);
                         Globals.ClearConsole();
-                        
                         return;
                     }
                 }

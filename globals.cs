@@ -1,4 +1,9 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
+using System.Text.Json;
 
 namespace SimplePasswordManager
 {
@@ -120,6 +125,37 @@ namespace SimplePasswordManager
             }
         }
 
+        /// <summary>
+        /// Executes a shell command
+        /// </summary>
+        /// <param name="command">The clipboard command (e.g., clip, pbcopy, xclip).</param>
+        /// <param name="input">The text to pipe into the command.</param>
+        public static void ExecuteCommand(string command, string input)
+        {
+            // Create a process to run the command
+            using (var process = new Process())
+            {
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash",
+                    Arguments = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"/c echo {input} | {command}" : $"-c \"echo -n {input} | {command}\"",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                process.Start();
+                process.WaitForExit();
+            }
+        }
+
+        /// <summary>
+        /// A utility function to create key-based menus.
+        /// </summary>
+        /// <param name="messages">Messages to display, as options, for example "[S]ettings", "[E]dit"</param>
+        /// <returns>The console key that was pressed, for example, S, or E</returns>
         public static ConsoleKeyInfo MenuBuilder(params string[] messages)
         {
             foreach (string i in messages)
@@ -128,6 +164,52 @@ namespace SimplePasswordManager
             }
             Console.Write(": ");
             return Console.ReadKey();
+        }
+
+        /// <summary>
+        /// Saves the current configuration settings to the config.json file.
+        /// </summary>
+        public static void SaveConfig()
+        {
+            try
+            {
+                // Create JSON object for config
+                JsonObject j = new JsonObject
+                {
+                    ["config"] = new JsonObject
+                    {
+                        ["first_load"] = isFirstLoad,
+                        ["debug_mode"] = debugMode,
+                        ["timeout"] = timeout,
+                    },
+                    ["version"] = version,
+                };
+
+                // Serialize JSON with indentation
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+                };
+                string jsonContent = j.ToJsonString(options);
+
+                // Write to config file
+                File.WriteAllText(configFile, jsonContent);
+
+                if (debugMode)
+                {
+                    Console.WriteLine($"[DEBUG] Config saved to {configFile}:");
+                    Console.WriteLine(jsonContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving config: {ex.Message}");
+                if (debugMode)
+                {
+                    Console.WriteLine($"[DEBUG] Exception details: {ex}");
+                }
+            }
         }
     }
 }
